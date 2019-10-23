@@ -10,6 +10,11 @@ import numpy as np
 def monthlyWetDry(fn, obs_col='Category', perm_col='perm', res_col='disagree', month_col='Month', nhd_col='NHD'):
     df = pd.read_csv(fn)
     print(df.groupby([obs_col, month_col])[res_col].value_counts())
+    print(df.groupby([obs_col, month_col])[res_col].value_counts().to_frame().unstack())
+    # Do logisitic regression for prob of disagreement with month as independent variable
+    res_df = df.groupby([obs_col, month_col])[res_col].value_counts().to_frame().unstack()
+    res_df.plot.bar()
+    plt.show()
 
 
 def annualDry(fn, obs_col='Category', perm_col='perm', res_col='disagree', nhd_col='NHD'):
@@ -26,6 +31,8 @@ fn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/validatio
 
 monthlyWetDry(fn)
 
-fn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/validation/daymet_catchments_17/' \
-     'annual_validation_01cfs.csv'
-annualDry(fn)
+
+
+# fn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/validation/daymet_catchments_17/' \
+#      'annual_validation_01cfs.csv'
+# annualDry(fn)
