@@ -28,15 +28,17 @@ def leap_year(y):
         return False
 
 
-def annualCompareToPoints(points_fn, mod_perm_base, out_fn, year_col='Year', obs_col='Category',
-                          id_col_points='COMID', id_col_perm='catch_id', perm_col='perm'):
+def annualCompareToPoints(points_fn, mod_perm_base, out_fn, year_col='Year', month_col='Month', obs_col='Category',
+                          id_col_points='COMID', id_col_perm='catch_id', perm_col='perm', nhd_col='NHD'):
     result_col = 'disagree'  # name of result column
     points_df = pd.read_csv(points_fn)  # open observations data as data frame
-    # get only first order streams and dry observations
-    points_df = points_df[(points_df['StreamOrde'] == 1) & (points_df[obs_col] == 'Dry')]
+    # get only first order streams with dry observations or wet observations from August or September
+    points_df = points_df[(points_df['StreamOrde'] == 1)]
+    points_df = points_df[(points_df[obs_col] == 'Dry') | ((points_df[month_col] == 8) | (points_df[month_col] == 9))]
     # create results data frame
     result_df = pd.DataFrame({id_col_points: points_df[id_col_points], year_col: points_df[year_col],
-                              obs_col: points_df[obs_col], perm_col: np.nan, result_col: 1})
+                              nhd_col: points_df[nhd_col], obs_col: points_df[obs_col],
+                              perm_col: np.nan, result_col: 1})
     years = points_df[year_col].unique()  # get years with observations
     for year in years:
         mod_df = pd.read_csv(mod_perm_base.replace('%year%', str(year)))  # read modeled data
@@ -54,15 +56,15 @@ def annualCompareToPoints(points_fn, mod_perm_base, out_fn, year_col='Year', obs
 
 
 def monthlyCompareToPoints(points_fn, mod_perm_base, out_fn, year_col='Year', month_col='Month', obs_col='Category',
-                          id_col_points='COMID', id_col_perm='catch_id', perm_col='perm'):
+                          id_col_points='COMID', id_col_perm='catch_id', perm_col='perm', nhd_col='NHD'):
     result_col = 'disagree'  # name of result column
     points_df = pd.read_csv(points_fn)  # open observations data as data frame
     # get only first order streams with a valid month value
     points_df = points_df[(points_df['StreamOrde'] == 1) & (points_df[month_col] > 0)]
     # create results data frame
     result_df = pd.DataFrame({id_col_points: points_df[id_col_points], year_col: points_df[year_col],
-                              month_col: points_df[month_col], obs_col: points_df[obs_col],
-                              perm_col: np.nan, result_col: 1})
+                              month_col: points_df[month_col], nhd_col: points_df[nhd_col],
+                              obs_col: points_df[obs_col], perm_col: np.nan, result_col: 1})
     years = points_df[year_col].unique()  # get years with observations
     for year in years:
         mod_df = pd.read_csv(mod_perm_base.replace('%year%', str(year)))  # read modeled data
@@ -134,27 +136,27 @@ def monthlyPermanence(start_year, end_year, basepath, outdir, fnbase, threshold,
         pdf.to_csv(outfn, index=False)
 
 
-# mwbm_base = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/runoff/daymet_catchments_17/' \
-#             'catchment_runoff_%year%.csv'
-# outdir = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/annual/'
-# fn_base = "annual_permanence_01cfs_"
-# flow_thresh = 0.1  # cfs
-#
-# annualPermanence(1980, 2018, mwbm_base, outdir, fn_base, flow_thresh, CFS_TO_CMS)
-#
-# outdir = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/monthly/'
-# fn_base = "monthly_permanence_01cfs_"
-# monthlyPermanence(1980, 2018, mwbm_base, outdir, fn_base, flow_thresh, CFS_TO_CMS)
+mwbm_base = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/runoff/daymet_catchments_17/' \
+            'catchment_runoff_%year%.csv'
+outdir = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/annual/'
+fn_base = "annual_permanence_01cfs_"
+flow_thresh = 0.1  # cfs
+
+annualPermanence(1980, 2018, mwbm_base, outdir, fn_base, flow_thresh, CFS_TO_CMS)
+
+outdir = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/monthly/'
+fn_base = "monthly_permanence_01cfs_"
+monthlyPermanence(1980, 2018, mwbm_base, outdir, fn_base, flow_thresh, CFS_TO_CMS)
 
 pointsfn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/obs/csv/points17_strord.csv'
 annual_perm_base = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/' \
                    'annual/annual_permanence_01cfs_%year%.csv'
 out_fn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/validation/daymet_catchments_17/' \
-                   'annual_validation.csv'
+                   'annual_validation_01cfs.csv'
 annualCompareToPoints(pointsfn, annual_perm_base, out_fn)
 
 month_perm_base = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/permanence/daymet_catchments_17/' \
                    'monthly/monthly_permanence_01cfs_%year%.csv'
 out_fn = 'E:/konrad/Projects/usgs/nhd-flow-estimates/wrk_data/WaterBalance/validation/daymet_catchments_17/' \
-                   'monthly_validation.csv'
+                   'monthly_validation_01cfs.csv'
 monthlyCompareToPoints(pointsfn, month_perm_base, out_fn)
