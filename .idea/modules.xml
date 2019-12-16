@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../packages/gispy/.idea/gispy.iml" filepath="$PROJECT_DIR$/../../packages/gispy/.idea/gispy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../packages/hydat/.idea/hydat.iml" filepath="$PROJECT_DIR$/../../packages/hydat/.idea/hydat.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/nhd-flow.iml" filepath="$PROJECT_DIR$/.idea/nhd-flow.iml" />
     </modules>
   </component>
